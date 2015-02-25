@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.md')) as f:
     README = f.read()
-with open(os.path.join(here, 'CHANGES.txt')) as f:
+with open(os.path.join(here, 'CHANGES.md')) as f:
     CHANGES = f.read()
 
 requires = [
@@ -19,6 +19,8 @@ requires = [
     'coverage',
     ]
 
+exec(open('eecologysmsreciever/version.py').read())
+
 setup(name='eEcology-SMS-reciever',
       version='0.0',
       description='eEcology-SMS-reciever',
@@ -29,9 +31,9 @@ setup(name='eEcology-SMS-reciever',
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         ],
-      author='',
-      author_email='',
-      url='',
+      author='Stefan Verhoeven',
+      author_email='s.verhoeven@esciencecenter.nl',
+      url='https://github.com/NLeSC/eEcology-SMS-reciever',
       keywords='web wsgi bfg pylons pyramid',
       packages=find_packages(),
       include_package_data=True,
