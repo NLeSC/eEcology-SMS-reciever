@@ -13,9 +13,8 @@ pyramid.debug_routematch = false
 pyramid.default_locale_name = en
 pyramid.includes =
     pyramid_debugtoolbar
-    pyramid_tm
 
-sqlalchemy.url = sqlite:///%(here)s/eEcology-SMS-reciever.sqlite
+sqlalchemy.url = postgresql://*******:********@db.e-ecology.sara.nl/eecology?sslmode=require
 
 # By default, the toolbar only appears for clients from IP addresses
 # '127.0.0.1' and '::1'.
