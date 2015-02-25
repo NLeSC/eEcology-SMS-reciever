@@ -16,7 +16,17 @@ Getting Started
 
 Edit development.ini to configure db connection, etc.
 
-    initialize_eEcology-SMS-reciever_db development.ini
+Create sms database schema:
+
+    psql -h db.e-ecology.sara.nl eecology < sms.sql
+
+Grant <someone> user to perform inserts on table.
+
+    GRANT USAGE ON SCHEMA sms TO <someone>;
+    GRANT INSERT ON sms.messags TO <someone>;
+
+Start service:
+
     pserve development.ini
 
 SMSSync configuration
