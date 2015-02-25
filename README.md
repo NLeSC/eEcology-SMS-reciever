@@ -1,7 +1,7 @@
 eEcology-SMS-reciever
 =====================
 
-Store recieved SMS messages into a database table.
+Webservice to store SMS messages into a database table.
 
 Accepts SMS messages from SMSSync Android app see https://play.google.com/store/apps/details?id=org.addhen.smssync, http://smssync.ushahidi.com/ and https://github.com/ushahidi/SMSSync .
 
@@ -20,14 +20,16 @@ Create sms database schema:
 
     psql -h db.e-ecology.sara.nl eecology < sms.sql
 
-Grant <someone> user to perform inserts on table.
+Grant `<someone>` user rights to perform inserts on table.
 
     GRANT USAGE ON SCHEMA sms TO <someone>;
-    GRANT INSERT ON sms.messags TO <someone>;
+    GRANT INSERT ON sms.messages TO <someone>;
 
 Start service:
 
     pserve development.ini
+
+Service running at http://localhost:6566/sms/
 
 SMSSync configuration
 ---------------------
@@ -38,4 +40,21 @@ Configure Sync URL with:
 * Keyword = '^ID', all tracker messages start with 'ID'
 * URL = Depends on where you run this server and if it is reversed proxied.
 * HTTP Method = POST
-* Data Format = JSON
+* Data Format = URLEncoded
+
+Docker build
+------------
+
+### Construct image
+
+1. `sudo docker build -t sverhoeven/smsreciever:1.0.0 .`
+2. Export or push to registry
+
+### Run container
+
+1. Import or pull from registry
+2. `sudo docker run -p 6566:6566 --env DB_URL="postgresql://*******:********@db.e-ecology.sara.nl/eecology?sslmode=require" --env SECRET_KEY=supersecretkey -d --name smsreciever sverhoeven/smsreciever:1.0.0`
+
+Error log is available with `sudo docker logs smsreciever`.
+
+Web application will run on http://localhost:6566/sms/

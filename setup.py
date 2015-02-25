@@ -14,6 +14,7 @@ requires = [
     'SQLAlchemy',
     'psycopg2',
     'waitress',
+    'paste',
     'nose',
     'mock',
     'coverage',
