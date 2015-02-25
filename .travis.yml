@@ -8,4 +8,4 @@ script:
 after_script:
   - 'pip install scrutinizer-ocular'
   - ocular
-
+sudo: false
