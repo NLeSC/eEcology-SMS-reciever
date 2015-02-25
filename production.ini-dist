@@ -14,6 +14,7 @@ pyramid.default_locale_name = en
 pyramid.includes =
 
 sqlalchemy.url = postgresql://*******:********@db.e-ecology.sara.nl/eecology?sslmode=require
+secret_key = supersecretkey
 
 [server:main]
 use = egg:waitress#main

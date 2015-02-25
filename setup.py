@@ -12,7 +12,11 @@ requires = [
     'pyramid',
     'pyramid_debugtoolbar',
     'SQLAlchemy',
+    'psycopg2',
     'waitress',
+    'nose',
+    'mock',
+    'coverage',
     ]
 
 setup(name='eEcology-SMS-reciever',
