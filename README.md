@@ -1,6 +1,10 @@
 eEcology-SMS-reciever
 =====================
 
+[![Build Status](https://travis-ci.org/NLeSC/eEcology-SMS-reciever.svg?branch=master)](https://travis-ci.org/NLeSC/eEcology-SMS-reciever)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/NLeSC/eEcology-SMS-reciever/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/eEcology-SMS-reciever/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/NLeSC/eEcology-SMS-reciever/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/eEcology-SMS-reciever/?branch=master)
+
 Webservice to store SMS messages into a database table.
 
 Accepts SMS messages from SMSSync Android app see https://play.google.com/store/apps/details?id=org.addhen.smssync, http://smssync.ushahidi.com/ and https://github.com/ushahidi/SMSSync .
