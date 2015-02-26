@@ -14,7 +14,7 @@ LOGGER = logging.getLogger('eecologysmsreciever')
 @view_config(route_name='messages', request_method='POST', renderer='json')
 def recieve_message(request):
     try:
-        message = RawMessage.fromRequest(request)
+        message = RawMessage.from_request(request)
         DBSession.add(message)
         DBSession.commit()
     except DBAPIError as e:
