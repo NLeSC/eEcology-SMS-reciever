@@ -90,20 +90,23 @@ class RawMessage(Base):
         raw_message.body = request.POST['message']
         raw_message.sent_to = request.POST['sent_to']
         raw_message.device_id = request.POST['device_id']
-        raw_message.sent_timestamp = datetime.datetime.utcfromtimestamp(int(request.POST['sent_timestamp'])/1000)
+        raw_message.sent_timestamp = datetime.datetime.utcfromtimestamp(
+            int(request.POST['sent_timestamp']) / 1000)
         raw_message.message = Message.from_raw(raw_message)
         return raw_message
+
 
 class Message(Base):
     __tablename__ = 'messages'
     __table_args__ = {'schema': SMS_SCHEMA}
     # message_id -- the unique ID of the SMS
-    message_id = Column(GUID(), ForeignKey(SMS_SCHEMA+'.raw_messages.message_id'), primary_key=True)
+    message_id = Column(
+        GUID(), ForeignKey(SMS_SCHEMA + '.raw_messages.message_id'), primary_key=True)
     device_info_serial = Column(Integer)
     date_time = Column(DateTime(timezone=True))
     battery_voltage = Column(Float(precision=3))
     memory_usage = Column(Float(precision=1))
-    debug_info = Column(Integer())
+    debug_info = Column(Unicode())
     raw = relationship('RawMessage', backref=backref('parsed'))
     positions = relationship('Position', backref=backref('message'))
 
@@ -123,13 +126,31 @@ class Message(Base):
         message.memory_usage = float(cols.pop(0)) / 10
         has_debug = len(cols[0]) == 8
         if has_debug:
-            message.debug_info = cols.pop(0) + ',' + cols.pop(0) + ',' + cols.pop(0)
+            message.debug_info = cols.pop(
+                0) + u',' + cols.pop(0) + u',' + cols.pop(0)
+        positions = []
+        while len(cols):
+            position = Position()
+            date = cols.pop(0)
+            time = cols.pop(0)
+            position.date_time = datetime.datetime(2000 + int(date[4:6]),
+                                                   int(date[2:4]),
+                                                   int(date[:2]),
+                                                   int(time[:2]),
+                                                   int(time[2:4]),
+                                                   )
+            position.lon = float(cols.pop(0)) / 1000000
+            position.lat = float(cols.pop(0)) / 1000000
+            positions.append(position)
+        message.positions = positions
         return message
+
 
 class Position(Base):
     __tablename__ = 'positions'
     __table_args__ = {'schema': SMS_SCHEMA}
-    message_id = Column(GUID(), ForeignKey(SMS_SCHEMA+'.messages.message_id'), primary_key=True)
+    message_id = Column(
+        GUID(), ForeignKey(SMS_SCHEMA + '.messages.message_id'), primary_key=True)
     device_info_serial = Column(Integer)
     date_time = Column(DateTime(timezone=True), primary_key=True)
     lon = Column(Float())

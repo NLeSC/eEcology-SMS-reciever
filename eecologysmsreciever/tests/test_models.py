@@ -5,13 +5,6 @@ from pyramid import testing
 from pyramid.exceptions import Forbidden
 from ..models import RawMessage, Message, Position
 
-example_body = {'sender': u'+31610363806',
-                'sent_to': u'',
-                'sent_timestamp': u'1424947719000',
-                'message': u'ID11878,58218,28119,18116,811',
-                'id': u'9426461f-5054-4e91-853a-4a4e024b7e03',
-                'device_id': u''
-                }
 
 class RawMessageTest(TestCase):
 
@@ -55,6 +48,7 @@ class RawMessageTest(TestCase):
 
         self.assertEqual(e.exception.message, 'Invalid secret')
 
+
 class MessageTest(TestCase):
     def test_fromBody_debug3gps(self):
         """Example 5 in api doc"""
@@ -67,4 +61,6 @@ class MessageTest(TestCase):
         self.assertEqual(message.memory_usage, 0.0)
         self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200')
         self.assertEqual(len(message.positions), 3)
-
+        self.assertEqual(message.positions[0].date_time, datetime.datetime(2013, 9, 18, 12, 43))
+        self.assertEqual(message.positions[0].lat, 4.9842689)
+        self.assertEqual(message.positions[0].lon, 52.4984249)
