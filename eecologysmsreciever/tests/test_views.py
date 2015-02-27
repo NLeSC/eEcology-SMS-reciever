@@ -53,6 +53,8 @@ class recieve_messageTest(TestCase):
         message_id = '7ba817ec-0c78-41cd-be10-7907ff787d39'
         inserted_row = DBSession.query(RawMessage).get(message_id)
         self.assertIsNotNone(inserted_row)
+        self.assertIsNotNone(inserted_row.message)
+        self.assertEqual(len(inserted_row.message.positions), 3)
 
     def test_badSecret_returnsUnsuccess(self):
         self.body['secret'] = 'the wrong secret'

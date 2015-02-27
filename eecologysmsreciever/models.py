@@ -79,6 +79,7 @@ class RawMessage(Base):
     # sent_timestamp -- the timestamp the SMS was sent. In the UNIX timestamp
     # format
     sent_timestamp = Column(DateTime(timezone=True))
+    message = relationship('Message', uselist=False, backref=backref('raw'))
 
     @classmethod
     def from_request(cls, request):
@@ -111,7 +112,6 @@ class Message(Base):
     battery_voltage = Column(Float(precision=3))
     memory_usage = Column(Float(precision=1))
     debug_info = Column(Unicode())
-    raw = relationship('RawMessage', backref=backref('parsed'))
     positions = relationship('Position', backref=backref('message'))
 
     @classmethod
