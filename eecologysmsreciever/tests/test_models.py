@@ -162,7 +162,7 @@ class MessageTest(TestCase):
         message = Message.from_body(body)
 
         self.assertEqual(message.device_info_serial, 1)
-        self.assertEqual(message.battery_voltage, 2)
+        self.assertEqual(message.battery_voltage, 0.002)
         self.assertEqual(message.memory_usage, 0.3)
         self.assertIsNone(message.debug_info)
         self.assertEqual(len(message.positions), 0)
