@@ -56,3 +56,10 @@ target/
 # Config files
 production.ini
 development.ini
+
+# Eclipse
+.project
+.pydevproject
+
+# Coverage
+cover/

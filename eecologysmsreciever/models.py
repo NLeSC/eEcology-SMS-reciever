@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import uuid
 from pyramid.exceptions import Forbidden
 from sqlalchemy import (
@@ -9,6 +9,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
 )
+from pytz import utc
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (
     scoped_session,
@@ -26,6 +27,7 @@ SMS_SCHEMA = 'sms'
 
 
 class GUID(TypeDecorator):
+
     """Platform-independent GUID type.
 
     Uses Postgresql's UUID type, otherwise uses
@@ -90,7 +92,7 @@ class RawMessage(Base):
         raw_message.body = request.POST['message']
         raw_message.sent_to = request.POST['sent_to']
         raw_message.device_id = request.POST['device_id']
-        raw_message.sent_timestamp = datetime.datetime.utcfromtimestamp(
+        raw_message.sent_timestamp = datetime.utcfromtimestamp(
             int(request.POST['sent_timestamp']) / 1000)
         raw_message.message = Message.from_raw(raw_message)
         return raw_message
@@ -101,7 +103,9 @@ class Message(Base):
     __table_args__ = {'schema': SMS_SCHEMA}
     # message_id -- the unique ID of the SMS
     message_id = Column(
-        GUID(), ForeignKey(SMS_SCHEMA + '.raw_messages.message_id'), primary_key=True)
+        GUID(),
+        ForeignKey(SMS_SCHEMA + '.raw_messages.message_id'),
+        primary_key=True)
     device_info_serial = Column(Integer)
     date_time = Column(DateTime(timezone=True))
     battery_voltage = Column(Float(precision=3))
@@ -124,23 +128,26 @@ class Message(Base):
         message.device_info_serial = int(cols.pop(0).lstrip('ID'))
         message.battery_voltage = float(cols.pop(0)) / 1000
         message.memory_usage = float(cols.pop(0)) / 10
-        has_debug = len(cols[0]) == 8
+        has_debug = len(cols) >= 1 and len(cols[0]) == 8
         if has_debug:
             message.debug_info = cols.pop(
                 0) + u',' + cols.pop(0) + u',' + cols.pop(0)
         positions = []
         while len(cols):
+            has_position = len(cols[0]) == 6
+            if not has_position:
+                break
             position = Position()
             date = cols.pop(0)
             time = cols.pop(0)
-            position.date_time = datetime.datetime(2000 + int(date[4:6]),
-                                                   int(date[2:4]),
-                                                   int(date[:2]),
-                                                   int(time[:2]),
-                                                   int(time[2:4]),
-                                                   )
-            position.lon = float(cols.pop(0)) / 1000000
-            position.lat = float(cols.pop(0)) / 1000000
+            position.date_time = datetime(2000 + int(date[4:6]),
+                                          int(date[2:4]),
+                                          int(date[:2]),
+                                          int(time[:2]),
+                                          int(time[2:4]),
+                                          tzinfo=utc)
+            position.lon = float(cols.pop(0)) / 10000000
+            position.lat = float(cols.pop(0)) / 10000000
             positions.append(position)
         message.positions = positions
         return message
@@ -150,8 +157,29 @@ class Position(Base):
     __tablename__ = 'positions'
     __table_args__ = {'schema': SMS_SCHEMA}
     message_id = Column(
-        GUID(), ForeignKey(SMS_SCHEMA + '.messages.message_id'), primary_key=True)
-    device_info_serial = Column(Integer)
+        GUID(),
+        ForeignKey(SMS_SCHEMA + '.messages.message_id'),
+        primary_key=True)
     date_time = Column(DateTime(timezone=True), primary_key=True)
     lon = Column(Float())
     lat = Column(Float())
+
+
+def dump_ddl():
+    """
+    Dumps create table postgresql SQL statements.
+
+    See http://docs.sqlalchemy.org/en/rel_0_9/faq/metadata_schema.html#how-can-i-get-the-create-table-drop-table-output-as-a-string
+    """
+    from io import StringIO
+    from sqlalchemy import create_engine
+    out = StringIO()
+
+    def dump(sql, *multiparams, **params):
+        out.write(unicode(sql.compile(dialect=engine.dialect)))
+
+    engine = create_engine('postgresql://', strategy='mock', executor=dump)
+    Base.metadata.create_all(engine, checkfirst=False)
+    ddl = out.getvalue()
+    out.close()
+    return ddl

@@ -18,6 +18,7 @@ requires = [
     'nose',
     'mock',
     'coverage',
+    'pytz',
     ]
 
 exec(open('eecologysmsreciever/version.py').read())

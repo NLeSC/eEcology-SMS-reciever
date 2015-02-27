@@ -1,4 +1,7 @@
--- How to create this file see http://docs.sqlalchemy.org/en/rel_0_9/faq/metadata_schema.html#how-can-i-get-the-create-table-drop-table-output-as-a-string
+-- Created from Python prompt with:
+-- from eecologysmsreciever.models import dump_ddl
+-- print dump_ddl()
+
 CREATE SCHEMA sms;
 
 CREATE TABLE sms.raw_messages (
@@ -9,7 +12,7 @@ CREATE TABLE sms.raw_messages (
 	device_id VARCHAR,
 	sent_timestamp TIMESTAMP WITH TIME ZONE,
 	PRIMARY KEY (message_id)
-)
+);
 
 CREATE TABLE sms.messages (
 	message_id UUID NOT NULL,
@@ -17,17 +20,16 @@ CREATE TABLE sms.messages (
 	date_time TIMESTAMP WITH TIME ZONE,
 	battery_voltage FLOAT(3),
 	memory_usage FLOAT(1),
-	debug_info INTEGER,
+	debug_info VARCHAR,
 	PRIMARY KEY (message_id),
 	FOREIGN KEY(message_id) REFERENCES sms.raw_messages (message_id)
-)
+);
 
 CREATE TABLE sms.positions (
 	message_id UUID NOT NULL,
-	device_info_serial INTEGER,
 	date_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	lon FLOAT,
 	lat FLOAT,
 	PRIMARY KEY (message_id, date_time),
 	FOREIGN KEY(message_id) REFERENCES sms.messages (message_id)
-)
+);
