@@ -1,6 +1,8 @@
 from datetime import datetime
 import uuid
+from geoalchemy2 import Geometry
 from pyramid.exceptions import Forbidden
+from pytz import utc
 from sqlalchemy import (
     Column,
     Unicode,
@@ -9,7 +11,6 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
 )
-from pytz import utc
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (
     scoped_session,
@@ -62,12 +63,13 @@ class GUID(TypeDecorator):
 
 
 class RawMessage(Base):
-    __tablename__ = 'raw_messages'
+    __tablename__ = 'raw_message'
     __table_args__ = {'schema': SMS_SCHEMA}
+    id = Column(Integer, primary_key=True)
     # message_id -- the unique ID of the SMS
-    message_id = Column(GUID(), primary_key=True)
+    message_id = Column(GUID())
     # from -- the number that sent the SMS
-    sender = Column(Unicode)
+    sent_from = Column(Unicode)
     # message -- the SMS sent
     body = Column(Unicode)
     # sent_to -- the phone number registered on the SIM card otherwise
@@ -75,7 +77,7 @@ class RawMessage(Base):
     sent_to = Column(Unicode)
     # device_id -- the unique id set on the device to be used by the server to
     # identify which device is communicating with it.
-    device_id = Column(Unicode)
+    gateway_id = Column(Unicode)
     # sent_timestamp -- the timestamp the SMS was sent. In the UNIX timestamp
     # format
     sent_timestamp = Column(DateTime(timezone=True))
@@ -89,10 +91,10 @@ class RawMessage(Base):
             raise Forbidden('Invalid secret')
         raw_message = RawMessage()
         raw_message.message_id = uuid.UUID(request.POST['message_id'])
-        raw_message.sender = request.POST['from']
+        raw_message.sent_from = request.POST['from']
         raw_message.body = request.POST['message']
         raw_message.sent_to = request.POST['sent_to']
-        raw_message.device_id = request.POST['device_id']
+        raw_message.gateway_id = request.POST['device_id']
         raw_message.sent_timestamp = datetime.utcfromtimestamp(
             int(request.POST['sent_timestamp']) / 1000)
         raw_message.message = Message.from_raw(raw_message)
@@ -100,13 +102,9 @@ class RawMessage(Base):
 
 
 class Message(Base):
-    __tablename__ = 'messages'
+    __tablename__ = 'message'
     __table_args__ = {'schema': SMS_SCHEMA}
-    # message_id -- the unique ID of the SMS
-    message_id = Column(
-        GUID(),
-        ForeignKey(SMS_SCHEMA + '.raw_messages.message_id'),
-        primary_key=True)
+    id = Column(Integer, ForeignKey(SMS_SCHEMA + '.raw_message.id'), primary_key=True)
     device_info_serial = Column(Integer)
     date_time = Column(DateTime(timezone=True))
     battery_voltage = Column(Float(precision=3))
@@ -140,6 +138,7 @@ class Message(Base):
             position = Position()
             date = cols.pop(0)
             time = cols.pop(0)
+            position.device_info_serial = message.device_info_serial
             position.date_time = datetime(2000 + int(date[4:6]),
                                           int(date[2:4]),
                                           int(date[:2]),
@@ -148,21 +147,22 @@ class Message(Base):
                                           tzinfo=utc)
             position.lon = float(cols.pop(0)) / 10000000
             position.lat = float(cols.pop(0)) / 10000000
+            position = 'POINT({lon}, {lat})'.format(lon=position.lon, lat=position.lat)
             positions.append(position)
         message.positions = positions
         return message
 
 
 class Position(Base):
-    __tablename__ = 'positions'
+    __tablename__ = 'position'
     __table_args__ = {'schema': SMS_SCHEMA}
-    message_id = Column(
-        GUID(),
-        ForeignKey(SMS_SCHEMA + '.messages.message_id'),
-        primary_key=True)
+    id = Column(Integer, ForeignKey(SMS_SCHEMA + '.message.id'), primary_key=True)
+    device_info_serial = Column(Integer)
     date_time = Column(DateTime(timezone=True), primary_key=True)
     lon = Column(Float())
     lat = Column(Float())
+    location = Column(Geometry('POINT'))
+
 
 
 def dump_ddl():
@@ -176,7 +176,11 @@ def dump_ddl():
     out = StringIO()
 
     def dump(sql, *multiparams, **params):
-        out.write(unicode(sql.compile(dialect=engine.dialect)))
+        if type(sql) is unicode:
+            pass
+        else:
+            sql = sql.compile(dialect=engine.dialect)
+        out.write(unicode(sql))
 
     engine = create_engine('postgresql://', strategy='mock', executor=dump)
     Base.metadata.create_all(engine, checkfirst=False)

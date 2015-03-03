@@ -4,7 +4,7 @@ from pyramid import testing
 from sqlalchemy import create_engine
 from sqlalchemy.exc import DBAPIError
 from ..models import RawMessage, DBSession, Base
-from ..views import recieve_message
+from ..views import recieve_message, status
 
 
 def setUpDatabase():
@@ -28,7 +28,7 @@ class recieve_messageTest(TestCase):
             'message_id': u'7ba817ec-0c78-41cd-be10-7907ff787d39',
             'sent_to': u'0987654321',
             'secret': u'supersecretkey',
-            'device_id': u'a device id',
+            'device_id': u'a gateway id',
             'sent_timestamp': u'1424873155000'
         }
         setUpDatabase()
@@ -74,3 +74,22 @@ class recieve_messageTest(TestCase):
 
         expected = {'payload': {'success': False, 'error': 'Database error'}}
         self.assertEquals(response, expected)
+
+class StatusTest(TestCase):
+    def setUp(self):
+        setUpDatabase()
+
+    def test_it(self):
+
+        response = status(testing.DummyRequest())
+
+        self.assertTrue('version' in response)
+
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_baddbconnection(self, mocked_DBSession):
+        mocked_DBSession.query.side_effect = DBAPIError(1, 2, 3, 4)
+
+        with self.assertRaises(DBAPIError):
+            status(testing.DummyRequest())
+
+

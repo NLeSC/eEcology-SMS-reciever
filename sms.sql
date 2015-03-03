@@ -4,32 +4,46 @@
 
 CREATE SCHEMA sms;
 
-CREATE TABLE sms.raw_messages (
-	message_id UUID NOT NULL,
-	sender VARCHAR,
+CREATE TABLE sms.raw_message (
+	id SERIAL NOT NULL,
+	message_id UUID,
+	sent_from VARCHAR,
 	body VARCHAR,
 	sent_to VARCHAR,
-	device_id VARCHAR,
+	gateway_id VARCHAR,
 	sent_timestamp TIMESTAMP WITH TIME ZONE,
-	PRIMARY KEY (message_id)
-);
+	PRIMARY KEY (id)
+)
 
-CREATE TABLE sms.messages (
-	message_id UUID NOT NULL,
+
+CREATE TABLE sms.message (
+	id INTEGER NOT NULL,
 	device_info_serial INTEGER,
 	date_time TIMESTAMP WITH TIME ZONE,
 	battery_voltage FLOAT(3),
 	memory_usage FLOAT(1),
 	debug_info VARCHAR,
-	PRIMARY KEY (message_id),
-	FOREIGN KEY(message_id) REFERENCES sms.raw_messages (message_id)
-);
+	PRIMARY KEY (id),
+	FOREIGN KEY(id) REFERENCES sms.raw_message (id)
+)
 
-CREATE TABLE sms.positions (
-	message_id UUID NOT NULL,
+
+CREATE TABLE sms.position (
+	id INTEGER NOT NULL,
+	device_info_serial INTEGER,
 	date_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	lon FLOAT,
 	lat FLOAT,
-	PRIMARY KEY (message_id, date_time),
-	FOREIGN KEY(message_id) REFERENCES sms.messages (message_id)
-);
+	location geometry(POINT,-1),
+	PRIMARY KEY (id, date_time),
+	FOREIGN KEY(id) REFERENCES sms.message (id)
+)
+
+CREATE INDEX "idx_position_location" ON "sms"."position" USING GIST (location)
+
+-- create user to insert sms messages
+-- grant insert to user
+-- grant select on sms.* to ...;
+
+
+

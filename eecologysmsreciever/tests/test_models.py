@@ -20,7 +20,7 @@ class RawMessageTest(TestCase):
             'message_id': u'7ba817ec-0c78-41cd-be10-7907ff787d39',
             'sent_to': u'0987654321',
             'secret': u'supersecretkey',
-            'device_id': u'a device id',
+            'device_id': u'a gateway id',
             'sent_timestamp': u'1424873155000'
         }
 
@@ -33,11 +33,11 @@ class RawMessageTest(TestCase):
         message = RawMessage.from_request(request)
 
         self.assertEqual(message.message_id, uuid.UUID('7ba817ec-0c78-41cd-be10-7907ff787d39'))
-        self.assertEqual(message.sender, '1234567890')
+        self.assertEqual(message.sent_from, '1234567890')
         self.assertEqual(
             message.body, 'ID1608,4108,0000,10101719,25,00820202020204020200,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903')
         self.assertEqual(message.sent_to, '0987654321')
-        self.assertEqual(message.device_id, 'a device id')
+        self.assertEqual(message.gateway_id, 'a gateway id')
         self.assertEqual(message.sent_timestamp, datetime(2015, 2, 25, 14, 5, 55))
 
     def test_from_request_wrongSecret_InvalidException(self):
@@ -171,5 +171,5 @@ class MessageTest(TestCase):
 class DumpDDLTest(TestCase):
     def test_it(self):
         output = dump_ddl()
-        self.assertIn('sms.messages', output)
-        self.assertIn('sms.positions', output)
+        self.assertIn('sms.message', output)
+        self.assertIn('sms.position', output)

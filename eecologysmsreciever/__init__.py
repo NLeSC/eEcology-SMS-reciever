@@ -20,5 +20,6 @@ def main(global_config, **settings):
     Base.metadata.bind = engine
     config = Configurator(settings=settings)
     config.add_route('messages', '/messages')
+    config.add_route('status', '/status')
     config.scan()
     return config.make_wsgi_app()

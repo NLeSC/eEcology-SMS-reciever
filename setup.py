@@ -12,6 +12,7 @@ requires = [
     'pyramid',
     'pyramid_debugtoolbar',
     'SQLAlchemy',
+    'GeoAlchemy2',
     'psycopg2',
     'waitress',
     'paste',
