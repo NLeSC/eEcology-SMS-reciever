@@ -130,15 +130,14 @@ class Message(Base):
         if has_debug:
             message.debug_info = cols.pop(
                 0) + u',' + cols.pop(0) + u',' + cols.pop(0)
-        positions = []
         while len(cols):
             has_position = len(cols[0]) == 6
             if not has_position:
                 break
             position = Position()
+            position.device_info_serial = message.device_info_serial
             date = cols.pop(0)
             time = cols.pop(0)
-            position.device_info_serial = message.device_info_serial
             position.date_time = datetime(2000 + int(date[4:6]),
                                           int(date[2:4]),
                                           int(date[:2]),
@@ -147,9 +146,8 @@ class Message(Base):
                                           tzinfo=utc)
             position.lon = float(cols.pop(0)) / 10000000
             position.lat = float(cols.pop(0)) / 10000000
-            position = 'POINT({lon}, {lat})'.format(lon=position.lon, lat=position.lat)
-            positions.append(position)
-        message.positions = positions
+            position.location = 'POINT({lon}, {lat})'.format(lon=position.lon, lat=position.lat)
+            message.positions.append(position)
         return message
 
 
