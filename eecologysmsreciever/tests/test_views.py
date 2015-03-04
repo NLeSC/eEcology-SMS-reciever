@@ -1,19 +1,9 @@
 from unittest import TestCase
 from mock import patch
 from pyramid import testing
-from sqlalchemy import create_engine
 from sqlalchemy.exc import DBAPIError
-from ..models import RawMessage, DBSession, Base
+from ..models import RawMessage, DBSession
 from ..views import recieve_message, status
-
-
-def setUpDatabase():
-    engine = create_engine('sqlite://')
-    # postgresql uses a schema, fake it with in-memory sqlite db
-    engine.execute("ATTACH DATABASE ':memory:' AS sms")
-    DBSession.configure(bind=engine)
-    Base.metadata.create_all(engine)
-
 
 class recieve_messageTest(TestCase):
 
@@ -31,13 +21,13 @@ class recieve_messageTest(TestCase):
             'device_id': u'a gateway id',
             'sent_timestamp': u'1424873155000'
         }
-        setUpDatabase()
 
     def tearDown(self):
         DBSession.remove()
         testing.tearDown()
 
-    def test_returnsSuccess(self):
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_returnsSuccess(self, mocked_DBSession):
         request = testing.DummyRequest(post=self.body)
 
         response = recieve_message(request)
@@ -45,16 +35,15 @@ class recieve_messageTest(TestCase):
         expected = {'payload': {'success': True, 'error': None}}
         self.assertEquals(response, expected)
 
-    def test_insertsRawMessage(self):
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_insertsRawMessage(self, mocked_DBSession):
         request = testing.DummyRequest(post=self.body)
 
         recieve_message(request)
 
-        message_id = '7ba817ec-0c78-41cd-be10-7907ff787d39'
-        inserted_row = DBSession.query(RawMessage).get(message_id)
-        self.assertIsNotNone(inserted_row)
-        self.assertIsNotNone(inserted_row.message)
-        self.assertEqual(len(inserted_row.message.positions), 3)
+        assert mocked_DBSession.add.called
+        assert mocked_DBSession.commit.called
+        # TODO assert what add() was called with
 
     def test_badSecret_returnsUnsuccess(self):
         self.body['secret'] = 'the wrong secret'
@@ -76,14 +65,14 @@ class recieve_messageTest(TestCase):
         self.assertEquals(response, expected)
 
 class StatusTest(TestCase):
-    def setUp(self):
-        setUpDatabase()
 
-    def test_it(self):
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_it(self, mocked_DBSession):
 
         response = status(testing.DummyRequest())
 
         self.assertTrue('version' in response)
+        mocked_DBSession.query.assert_called_once_with('SELECT 1')
 
     @patch('eecologysmsreciever.views.DBSession')
     def test_baddbconnection(self, mocked_DBSession):
