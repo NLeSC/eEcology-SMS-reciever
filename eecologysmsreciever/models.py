@@ -10,6 +10,7 @@ from sqlalchemy import (
     Float,
     DateTime,
     ForeignKey,
+    UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (
@@ -67,7 +68,7 @@ class RawMessage(Base):
     __table_args__ = {'schema': SMS_SCHEMA}
     id = Column(Integer, primary_key=True)
     # message_id -- the unique ID of the SMS
-    message_id = Column(GUID())
+    message_id = Column(GUID(), unique=True)
     # from -- the number that sent the SMS
     sent_from = Column(Unicode)
     # message -- the SMS sent
@@ -146,21 +147,22 @@ class Message(Base):
                                           tzinfo=utc)
             position.lon = float(cols.pop(0)) / 10000000
             position.lat = float(cols.pop(0)) / 10000000
-            position.location = 'POINT({lon}, {lat})'.format(lon=position.lon, lat=position.lat)
+            loc_tmpl = 'SRID=4326;POINT({lon} {lat})'
+            position.location = loc_tmpl.format(lon=position.lon, lat=position.lat)
             message.positions.append(position)
         return message
 
 
 class Position(Base):
     __tablename__ = 'position'
-    __table_args__ = {'schema': SMS_SCHEMA}
+    __table_args__ = (UniqueConstraint('device_info_serial', 'date_time'),
+                      {'schema': SMS_SCHEMA})
     id = Column(Integer, ForeignKey(SMS_SCHEMA + '.message.id'), primary_key=True)
     device_info_serial = Column(Integer)
     date_time = Column(DateTime(timezone=True), primary_key=True)
     lon = Column(Float())
     lat = Column(Float())
-    location = Column(Geometry('POINT'))
-
+    location = Column(Geometry('POINT', srid=4326))
 
 
 def dump_ddl():

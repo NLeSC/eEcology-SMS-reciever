@@ -2,8 +2,9 @@ from unittest import TestCase
 from mock import patch
 from pyramid import testing
 from sqlalchemy.exc import DBAPIError
-from ..models import RawMessage, DBSession
+from ..models import DBSession
 from ..views import recieve_message, status
+
 
 class recieve_messageTest(TestCase):
 
@@ -64,6 +65,7 @@ class recieve_messageTest(TestCase):
         expected = {'payload': {'success': False, 'error': 'Database error'}}
         self.assertEquals(response, expected)
 
+
 class StatusTest(TestCase):
 
     @patch('eecologysmsreciever.views.DBSession')
@@ -72,13 +74,11 @@ class StatusTest(TestCase):
         response = status(testing.DummyRequest())
 
         self.assertTrue('version' in response)
-        mocked_DBSession.query.assert_called_once_with('SELECT 1')
+        mocked_DBSession.execute.assert_called_once_with('SELECT TRUE')
 
     @patch('eecologysmsreciever.views.DBSession')
     def test_baddbconnection(self, mocked_DBSession):
-        mocked_DBSession.query.side_effect = DBAPIError(1, 2, 3, 4)
+        mocked_DBSession.execute.side_effect = DBAPIError(1, 2, 3, 4)
 
         with self.assertRaises(DBAPIError):
             status(testing.DummyRequest())
-
-

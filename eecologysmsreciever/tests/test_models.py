@@ -88,7 +88,6 @@ class MessageTest(TestCase):
         self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200')
         self.assertEqual(len(message.positions), 0)
 
-
     def test_fromBody_debug1gps(self):
         """Example 4 in api doc"""
         body = u'ID1608,4108,0000,10101719,25,00820202020204020200,180914,1243,49842689,524984249'
@@ -103,8 +102,7 @@ class MessageTest(TestCase):
         self.assertEqual(message.positions[0].date_time, datetime(2014, 9, 18, 12, 43, tzinfo=utc))
         self.assertEqual(message.positions[0].lon, 4.9842689)
         self.assertEqual(message.positions[0].lat, 52.4984249)
-        self.assertEqual(message.positions[0].location, 'POINT(4.9842689, 52.4984249)')
-
+        self.assertEqual(message.positions[0].location, 'SRID=4326;POINT(4.9842689 52.4984249)')
 
     def test_fromBody_debug3gps(self):
         """Example 5 in api doc"""
@@ -120,15 +118,15 @@ class MessageTest(TestCase):
         self.assertEqual(message.positions[0].date_time, datetime(2014, 9, 18, 12, 43, tzinfo=utc))
         self.assertEqual(message.positions[0].lon, 4.9842689)
         self.assertEqual(message.positions[0].lat, 52.4984249)
-        self.assertEqual(message.positions[0].location, 'POINT(4.9842689, 52.4984249)')
+        self.assertEqual(message.positions[0].location, 'SRID=4326;POINT(4.9842689 52.4984249)')
         self.assertEqual(message.positions[1].date_time, datetime(2014, 9, 18, 12, 38, tzinfo=utc))
         self.assertEqual(message.positions[1].lon, 4.9841742)
         self.assertEqual(message.positions[1].lat, 52.4983380)
-        self.assertEqual(message.positions[1].location, 'POINT(4.9841742, 52.498338)')
+        self.assertEqual(message.positions[1].location, 'SRID=4326;POINT(4.9841742 52.498338)')
         self.assertEqual(message.positions[2].date_time, datetime(2014, 9, 18, 12, 35, tzinfo=utc))
         self.assertEqual(message.positions[2].lon, 4.9842004)
         self.assertEqual(message.positions[2].lat, 52.4983903)
-        self.assertEqual(message.positions[2].location, 'POINT(4.9842004, 52.4983903)')
+        self.assertEqual(message.positions[2].location, 'SRID=4326;POINT(4.9842004 52.4983903)')
 
     def test_fromBody_4gps(self):
         """Example 6 in api doc"""
@@ -144,19 +142,19 @@ class MessageTest(TestCase):
         self.assertEqual(message.positions[0].date_time, datetime(2014, 9, 18, 12, 43, tzinfo=utc))
         self.assertEqual(message.positions[0].lon, 4.9842689)
         self.assertEqual(message.positions[0].lat, 52.4984249)
-        self.assertEqual(message.positions[0].location, 'POINT(4.9842689, 52.4984249)')
+        self.assertEqual(message.positions[0].location, 'SRID=4326;POINT(4.9842689 52.4984249)')
         self.assertEqual(message.positions[1].date_time, datetime(2014, 9, 18, 12, 38, tzinfo=utc))
         self.assertEqual(message.positions[1].lon, 4.9841742)
         self.assertEqual(message.positions[1].lat, 52.4983380)
-        self.assertEqual(message.positions[1].location, 'POINT(4.9841742, 52.498338)')
+        self.assertEqual(message.positions[1].location, 'SRID=4326;POINT(4.9841742 52.498338)')
         self.assertEqual(message.positions[2].date_time, datetime(2014, 9, 18, 12, 35, tzinfo=utc))
         self.assertEqual(message.positions[2].lon, 4.9842004)
         self.assertEqual(message.positions[2].lat, 52.4983903)
-        self.assertEqual(message.positions[2].location, 'POINT(4.9842004, 52.4983903)')
+        self.assertEqual(message.positions[2].location, 'SRID=4326;POINT(4.9842004 52.4983903)')
         self.assertEqual(message.positions[3].date_time, datetime(2014, 9, 18, 12, 32, tzinfo=utc))
         self.assertEqual(message.positions[3].lon, 4.9842014)
         self.assertEqual(message.positions[3].lat, 52.4983503)
-        self.assertEqual(message.positions[3].location, 'POINT(4.9842014, 52.4983503)')
+        self.assertEqual(message.positions[3].location, 'SRID=4326;POINT(4.9842014 52.4983503)')
 
     def test_fromBody_noId(self):
         body = u'Meet you at the bar tonight'

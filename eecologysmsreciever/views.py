@@ -19,6 +19,7 @@ def recieve_message(request):
         DBSession.add(message)
         DBSession.commit()
     except DBAPIError as e:
+        DBSession.rollback()
         LOGGER.warn(e)
         return {'payload': {'success': False, 'error': 'Database error'}}
     except Forbidden as e:
@@ -26,7 +27,8 @@ def recieve_message(request):
         return {'payload': {'success': False, 'error': 'Forbidden'}}
     return {'payload': {'success': True, 'error': None}}
 
+
 @view_config(route_name='status', request_method='GET', renderer='json')
 def status(request):
-    DBSession.query('SELECT 1')
+    DBSession.execute('SELECT TRUE').scalar()
     return {'version': __version__}

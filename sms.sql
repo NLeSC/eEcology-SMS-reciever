@@ -12,8 +12,9 @@ CREATE TABLE sms.raw_message (
 	sent_to VARCHAR,
 	gateway_id VARCHAR,
 	sent_timestamp TIMESTAMP WITH TIME ZONE,
-	PRIMARY KEY (id)
-)
+	PRIMARY KEY (id),
+	UNIQUE (message_id)
+);
 
 
 CREATE TABLE sms.message (
@@ -25,7 +26,7 @@ CREATE TABLE sms.message (
 	debug_info VARCHAR,
 	PRIMARY KEY (id),
 	FOREIGN KEY(id) REFERENCES sms.raw_message (id)
-)
+);
 
 
 CREATE TABLE sms.position (
@@ -34,16 +35,14 @@ CREATE TABLE sms.position (
 	date_time TIMESTAMP WITH TIME ZONE NOT NULL,
 	lon FLOAT,
 	lat FLOAT,
-	location geometry(POINT,-1),
+	location geometry(POINT,4326),
 	PRIMARY KEY (id, date_time),
+	UNIQUE (device_info_serial, date_time),
 	FOREIGN KEY(id) REFERENCES sms.message (id)
-)
+);
 
-CREATE INDEX "idx_position_location" ON "sms"."position" USING GIST (location)
+CREATE INDEX "idx_position_location" ON "sms"."position" USING GIST (location);
 
 -- create user to insert sms messages
 -- grant insert to user
 -- grant select on sms.* to ...;
-
-
-
