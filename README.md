@@ -24,10 +24,7 @@ Create sms database schema:
 
     psql -h db.e-ecology.sara.nl eecology < sms.sql
 
-Grant `<someone>` user rights to perform inserts on table.
-
-    GRANT USAGE ON SCHEMA sms TO <someone>;
-    GRANT INSERT ON sms.messages TO <someone>;
+Grant `<someone>` user rights to perform inserts on table, see comments in `sms.sql` for required grants.
 
 Start service:
 
