@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 from geoalchemy2 import Geometry
 from pyramid.exceptions import Forbidden
@@ -132,19 +132,16 @@ class Message(Base):
             message.debug_info = cols.pop(
                 0) + u',' + cols.pop(0) + u',' + cols.pop(0)
         while len(cols):
-            has_position = len(cols[0]) == 6
+            has_position = len(cols[0]) == 5
             if not has_position:
                 break
             position = Position()
             position.device_info_serial = message.device_info_serial
             date = cols.pop(0)
             time = cols.pop(0)
-            position.date_time = datetime(2000 + int(date[4:6]),
-                                          int(date[2:4]),
-                                          int(date[:2]),
-                                          int(time[:2]),
-                                          int(time[2:4]),
-                                          tzinfo=utc)
+            year = datetime(2000 + int(date[:2]), 1, 1, tzinfo=utc)
+            # -1 is needed because days of year starts at 1 and min day of datetime is 1 Jan
+            position.date_time = year + timedelta(days=int(date[2:5]) - 1, seconds=int(time))
             position.lon = float(cols.pop(0)) / 10000000
             position.lat = float(cols.pop(0)) / 10000000
             loc_tmpl = 'SRID=4326;POINT({lon} {lat})'
