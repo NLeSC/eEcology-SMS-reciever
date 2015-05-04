@@ -16,7 +16,7 @@ class RawMessageTest(TestCase):
         self.config = testing.setUp(settings=self.settings)
         self.body = {
             'from': u'1234567890',
-            'message': u'ID1608,4108,0000,10101719,25,00820202020204020200,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903',
+            'message': u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903',
             'message_id': u'7ba817ec-0c78-41cd-be10-7907ff787d39',
             'sent_to': u'0987654321',
             'secret': u'supersecretkey',
@@ -35,7 +35,7 @@ class RawMessageTest(TestCase):
         self.assertEqual(message.message_id, uuid.UUID('7ba817ec-0c78-41cd-be10-7907ff787d39'))
         self.assertEqual(message.sent_from, '1234567890')
         self.assertEqual(
-            message.body, 'ID1608,4108,0000,10101719,25,00820202020204020200,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903')
+            message.body, 'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903')
         self.assertEqual(message.sent_to, '0987654321')
         self.assertEqual(message.gateway_id, 'a gateway id')
         self.assertEqual(message.sent_timestamp, datetime(2015, 2, 25, 14, 5, 55))
@@ -66,38 +66,38 @@ class MessageTest(TestCase):
 
     def test_fromBody_nogps(self):
         """Example 2 in api doc"""
-        body = u'ID1608,4108,0000,10101719,25,00820202020204020200'
+        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842'
 
         message = Message.from_body(body)
 
         self.assertEqual(message.device_info_serial, 1608)
         self.assertEqual(message.battery_voltage, 4.108)
         self.assertEqual(message.memory_usage, 0.0)
-        self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200')
+        self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200,3,842')
         self.assertEqual(len(message.positions), 0)
 
     def test_fromBody_nogpsyet(self):
         """Example 3 in api doc"""
-        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,,,,'
+        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,,,,'
 
         message = Message.from_body(body)
 
         self.assertEqual(message.device_info_serial, 1608)
         self.assertEqual(message.battery_voltage, 4.108)
         self.assertEqual(message.memory_usage, 0.0)
-        self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200')
+        self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200,3,842')
         self.assertEqual(len(message.positions), 0)
 
     def test_fromBody_debug1gps(self):
         """Example 4 in api doc"""
-        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,180914,1243,49842689,524984249'
+        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,180914,1243,49842689,524984249'
 
         message = Message.from_body(body)
 
         self.assertEqual(message.device_info_serial, 1608)
         self.assertEqual(message.battery_voltage, 4.108)
         self.assertEqual(message.memory_usage, 0.0)
-        self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200')
+        self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200,3,842')
         self.assertEqual(len(message.positions), 1)
         self.assertEqual(message.positions[0].date_time, datetime(2014, 9, 18, 12, 43, tzinfo=utc))
         self.assertEqual(message.positions[0].lon, 4.9842689)
@@ -106,14 +106,14 @@ class MessageTest(TestCase):
 
     def test_fromBody_debug3gps(self):
         """Example 5 in api doc"""
-        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903'
+        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903'
 
         message = Message.from_body(body)
 
         self.assertEqual(message.device_info_serial, 1608)
         self.assertEqual(message.battery_voltage, 4.108)
         self.assertEqual(message.memory_usage, 0.0)
-        self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200')
+        self.assertEqual(message.debug_info, u'10101719,25,00820202020204020200,3,842')
         self.assertEqual(len(message.positions), 3)
         self.assertEqual(message.positions[0].date_time, datetime(2014, 9, 18, 12, 43, tzinfo=utc))
         self.assertEqual(message.positions[0].lon, 4.9842689)

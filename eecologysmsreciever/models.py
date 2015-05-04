@@ -129,8 +129,11 @@ class Message(Base):
         message.memory_usage = float(cols.pop(0)) / 10
         has_debug = len(cols) >= 1 and len(cols[0]) == 8
         if has_debug:
-            message.debug_info = cols.pop(
-                0) + u',' + cols.pop(0) + u',' + cols.pop(0)
+            message.debug_info = cols.pop(0) + u','
+            message.debug_info += cols.pop(0) + u','
+            message.debug_info += cols.pop(0) + u','
+            message.debug_info += cols.pop(0) + u','
+            message.debug_info += cols.pop(0)
         while len(cols):
             has_position = len(cols[0]) == 6
             if not has_position:
