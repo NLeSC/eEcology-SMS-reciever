@@ -61,5 +61,8 @@ development.ini
 .project
 .pydevproject
 
+# PyCharm
+.idea
+
 # Coverage
 cover/

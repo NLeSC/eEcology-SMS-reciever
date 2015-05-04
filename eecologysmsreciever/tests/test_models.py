@@ -4,7 +4,7 @@ from unittest import TestCase
 from pyramid import testing
 from pyramid.exceptions import Forbidden
 from pytz import utc
-from ..models import RawMessage, Message, dump_ddl
+from eecologysmsreciever.models import RawMessage, Message, dump_ddl
 
 
 class RawMessageTest(TestCase):
@@ -16,7 +16,7 @@ class RawMessageTest(TestCase):
         self.config = testing.setUp(settings=self.settings)
         self.body = {
             'from': u'1234567890',
-            'message': u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903',
+            'message': u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,14261,45780,49842689,524984249,14261,45480,49841742,524983380,14261,45300,49842004,524983903',
             'message_id': u'7ba817ec-0c78-41cd-be10-7907ff787d39',
             'sent_to': u'0987654321',
             'secret': u'supersecretkey',
@@ -34,8 +34,7 @@ class RawMessageTest(TestCase):
 
         self.assertEqual(message.message_id, uuid.UUID('7ba817ec-0c78-41cd-be10-7907ff787d39'))
         self.assertEqual(message.sent_from, '1234567890')
-        self.assertEqual(
-            message.body, 'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903')
+        self.assertEqual(message.body, 'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,14261,45780,49842689,524984249,14261,45480,49841742,524983380,14261,45300,49842004,524983903')
         self.assertEqual(message.sent_to, '0987654321')
         self.assertEqual(message.gateway_id, 'a gateway id')
         self.assertEqual(message.sent_timestamp, datetime(2015, 2, 25, 14, 5, 55))
@@ -90,7 +89,7 @@ class MessageTest(TestCase):
 
     def test_fromBody_debug1gps(self):
         """Example 4 in api doc"""
-        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,180914,1243,49842689,524984249'
+        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,14261,45780,49842689,524984249'
 
         message = Message.from_body(body)
 
@@ -106,7 +105,7 @@ class MessageTest(TestCase):
 
     def test_fromBody_debug3gps(self):
         """Example 5 in api doc"""
-        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903'
+        body = u'ID1608,4108,0000,10101719,25,00820202020204020200,3,842,14261,45780,49842689,524984249,14261,45480,49841742,524983380,14261,45300,49842004,524983903'
 
         message = Message.from_body(body)
 
@@ -130,7 +129,7 @@ class MessageTest(TestCase):
 
     def test_fromBody_4gps(self):
         """Example 6 in api doc"""
-        body = u'ID1608,4108,0000,180914,1243,49842689,524984249,180914,1238,49841742,524983380,180914,1235,49842004,524983903,180914,1232,49842014,524983503'
+        body = u'ID1608,4108,0000,14261,45780,49842689,524984249,14261,45480,49841742,524983380,14261,45300,49842004,524983903,14261,45120,49842014,524983503'
 
         message = Message.from_body(body)
 
