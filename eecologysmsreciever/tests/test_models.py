@@ -4,7 +4,8 @@ from unittest import TestCase
 from pyramid import testing
 from pyramid.exceptions import Forbidden
 from pytz import utc
-from eecologysmsreciever.models import RawMessage, Message, dump_ddl
+from eecologysmsreciever.models import RawMessage, Message, Position
+from eecologysmsreciever.models import dump_ddl
 
 
 class RawMessageTest(TestCase):

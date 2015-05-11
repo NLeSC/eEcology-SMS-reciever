@@ -98,7 +98,6 @@ class RawMessage(Base):
         raw_message.gateway_id = request.POST['device_id']
         raw_message.sent_timestamp = datetime.utcfromtimestamp(
             int(request.POST['sent_timestamp']) / 1000)
-        raw_message.message = Message.from_raw(raw_message)
         return raw_message
 
 
@@ -112,12 +111,15 @@ class Message(Base):
     memory_usage = Column(Float(precision=1))
     debug_info = Column(Unicode())
     positions = relationship('Position', backref=backref('message'))
+    cols = []
 
     @classmethod
     def from_raw(cls, raw_message):
         body = raw_message.body
+
         message = cls.from_body(body)
         message.date_time = raw_message.sent_timestamp
+        message.raw = raw_message
         return message
 
     @classmethod
@@ -134,22 +136,8 @@ class Message(Base):
             message.debug_info += cols.pop(0) + u','  # status/error codes at commands
             message.debug_info += cols.pop(0) + u','  # network registration
             message.debug_info += cols.pop(0)         # arcfn, absolute radio frequency number
-        while len(cols):
-            has_position = len(cols[0]) == 5
-            if not has_position:
-                break
-            position = Position()
-            position.device_info_serial = message.device_info_serial
-            date = cols.pop(0)
-            time = cols.pop(0)
-            year = datetime(2000 + int(date[:2]), 1, 1, tzinfo=utc)
-            # -1 is needed because days of year starts at 1 and min day of datetime is 1 Jan
-            position.date_time = year + timedelta(days=int(date[2:5]) - 1, seconds=int(time))
-            position.lon = float(cols.pop(0)) / 10000000
-            position.lat = float(cols.pop(0)) / 10000000
-            loc_tmpl = 'SRID=4326;POINT({lon} {lat})'
-            position.location = loc_tmpl.format(lon=position.lon, lat=position.lat)
-            message.positions.append(position)
+        message.cols = cols
+
         return message
 
 
@@ -164,6 +152,30 @@ class Position(Base):
     lat = Column(Float())
     location = Column(Geometry('POINT', srid=4326))
 
+    @classmethod
+    def from_message(cls, message):
+        """Return list of Position's parsed from message body"""
+	cols = message.cols
+        positions = []
+        while len(cols):
+            has_position = len(cols[0]) == 5
+            if not has_position:
+                break
+            position = Position()
+            position.message = message
+            position.device_info_serial = message.device_info_serial
+            date = cols.pop(0)
+            time = cols.pop(0)
+            year = datetime(2000 + int(date[:2]), 1, 1, tzinfo=utc)
+            # -1 is needed because days of year starts at 1 and min day of datetime is 1 Jan
+            position.date_time = year + timedelta(days=int(date[2:5]) - 1, seconds=int(time))
+            position.lon = float(cols.pop(0)) / 10000000
+            position.lat = float(cols.pop(0)) / 10000000
+            loc_tmpl = 'SRID=4326;POINT({lon} {lat})'
+            position.location = loc_tmpl.format(lon=position.lon, lat=position.lat)
+            positions.append(position)
+        return positions
+           
 
 def dump_ddl():
     """
