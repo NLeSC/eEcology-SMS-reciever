@@ -15,7 +15,7 @@ class recieve_messageTest(TestCase):
         self.config = testing.setUp(settings=self.settings)
         self.body = {
             'from': u'1234567890',
-            'message': u'ID1608,4108,0000,10101719,25,00820202020204020200,14261,45780,49842689,524984249,14261,45480,49841742,524983380,14261,45300,49842004,524983903',
+            'message': u'1607,4099,0000,014022,031,00820202020204020200,0,722,15133,52797,49561568,523572094,15133,53335,49694351,523804057,15133,53161,49624783,523701953',
             'message_id': u'7ba817ec-0c78-41cd-be10-7907ff787d39',
             'sent_to': u'0987654321',
             'secret': u'supersecretkey',
@@ -42,8 +42,9 @@ class recieve_messageTest(TestCase):
 
         recieve_message(request)
 
-        assert mocked_DBSession.add.called
-        assert mocked_DBSession.commit.called
+        assert mocked_DBSession.add.times_called(5)
+        assert mocked_DBSession.commit.times_called(2)
+        assert mocked_DBSession.begin_nested.times_called(3)
         # TODO assert what add() was called with
 
     def test_badSecret_returnsUnsuccess(self):
@@ -63,6 +64,33 @@ class recieve_messageTest(TestCase):
         response = recieve_message(request)
 
         expected = {'payload': {'success': False, 'error': 'Database error'}}
+        self.assertEquals(response, expected)
+
+    def test_badText_returnsUnsuccess(self):
+        self.body['message'] = u'hallo'
+        request = testing.DummyRequest(post=self.body)
+
+        response = recieve_message(request)
+
+        expected = {'payload': {'success': False, 'error': 'Invalid message'}}
+        self.assertEquals(response, expected)
+
+    def test_emptyText_returnsUnsuccess(self):
+        self.body['message'] = u''
+        request = testing.DummyRequest(post=self.body)
+
+        response = recieve_message(request)
+
+        expected = {'payload': {'success': False, 'error': 'Invalid message'}}
+        self.assertEquals(response, expected)
+
+    def test_halfText_returnsUnsuccess(self):
+        self.body['message'] = u'1608,4108,0000,10101719,25,00820202020'
+        request = testing.DummyRequest(post=self.body)
+
+        response = recieve_message(request)
+
+        expected = {'payload': {'success': False, 'error': 'Invalid message'}}
         self.assertEquals(response, expected)
 
 
