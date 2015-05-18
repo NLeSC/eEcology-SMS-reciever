@@ -59,3 +59,20 @@ Docker build
 Error log is available with `sudo docker logs smsreciever`.
 
 Web application will run on http://localhost:6566/sms/
+
+Database upgrades
+-----------------
+
+The latest schema is specified in `sms.sql`.
+
+Using alembic (http://pythonhosted.org/alembic/) for database migrations.
+
+To create a new migration step run:
+
+    alembic revision -m "Timestamp without time zone"
+    # edit alembic/versions/*py files to specify changes
+
+To upgrade an existing schema run:
+
+    alembic upgrade head --sql | psql ...
+

@@ -11,7 +11,7 @@ CREATE TABLE sms.raw_message (
 	body VARCHAR,
 	sent_to VARCHAR,
 	gateway_id VARCHAR,
-	sent_timestamp TIMESTAMP WITH TIME ZONE,
+	sent_timestamp TIMESTAMP WITHOUT TIME ZONE,
 	PRIMARY KEY (id),
 	UNIQUE (message_id)
 );
@@ -20,7 +20,7 @@ CREATE TABLE sms.raw_message (
 CREATE TABLE sms.message (
 	id INTEGER NOT NULL,
 	device_info_serial INTEGER,
-	date_time TIMESTAMP WITH TIME ZONE,
+	date_time TIMESTAMP WITHOUT TIME ZONE,
 	battery_voltage FLOAT(3),
 	memory_usage FLOAT(1),
 	debug_info VARCHAR,
@@ -32,7 +32,7 @@ CREATE TABLE sms.message (
 CREATE TABLE sms.position (
 	id INTEGER NOT NULL,
 	device_info_serial INTEGER,
-	date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+	date_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 	lon FLOAT,
 	lat FLOAT,
 	location geometry(POINT,4326),

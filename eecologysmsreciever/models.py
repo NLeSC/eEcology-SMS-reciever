@@ -89,7 +89,7 @@ class RawMessage(Base):
     gateway_id = Column(Unicode)
     # sent_timestamp -- the timestamp the SMS was sent. In the UNIX timestamp
     # format
-    sent_timestamp = Column(DateTime(timezone=True))
+    sent_timestamp = Column(DateTime(timezone=False))
     message = relationship('Message', uselist=False, backref=backref('raw'),
                            cascade='', cascade_backrefs=True)
 
@@ -120,7 +120,7 @@ class Message(Base):
                 ForeignKey(SMS_SCHEMA + '.raw_message.id'),
                 primary_key=True)
     device_info_serial = Column(Integer)
-    date_time = Column(DateTime(timezone=True))
+    date_time = Column(DateTime(timezone=False))
     battery_voltage = Column(Float(precision=3))
     memory_usage = Column(Float(precision=1))
     debug_info = Column(Unicode())
@@ -179,7 +179,7 @@ class Position(Base):
                       {'schema': SMS_SCHEMA})
     id = Column(Integer, ForeignKey(SMS_SCHEMA + '.message.id'), primary_key=True)
     device_info_serial = Column(Integer)
-    date_time = Column(DateTime(timezone=True), primary_key=True)
+    date_time = Column(DateTime(timezone=False), primary_key=True)
     lon = Column(Float())
     lat = Column(Float())
     location = Column(Geometry('POINT', srid=4326))

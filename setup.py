@@ -16,10 +16,13 @@ requires = [
     'psycopg2',
     'waitress',
     'paste',
+    # for testing
     'nose',
     'mock',
     'coverage',
     'pytz',
+    # for db migrations
+    'alembic',
     ]
 
 exec(open('eecologysmsreciever/version.py').read())
