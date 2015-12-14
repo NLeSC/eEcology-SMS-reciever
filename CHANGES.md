@@ -1,3 +1,8 @@
+1.0.5
+-----
+
+- Inserts raw message before parsing message, instead of parsing message and then inserting raw message and parsed message.
+
 1.0.4
 -----
 
