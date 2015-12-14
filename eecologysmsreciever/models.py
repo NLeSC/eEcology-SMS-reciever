@@ -108,8 +108,6 @@ class RawMessage(Base):
         raw_message.sent_timestamp = datetime.utcfromtimestamp(
             int(request.POST['sent_timestamp']) / 1000)
 
-        raw_message.message = Message.from_raw(raw_message)
-
         return raw_message
 
 

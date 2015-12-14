@@ -40,6 +40,9 @@ def recieve_message(request):
     except ValueError as e:
         LOGGER.debug(e)
         return {'payload': {'success': False, 'error': 'Invalid message'}}
+    except KeyError as e:
+        LOGGER.debug(e)
+        return {'payload': {'success': False, 'error': 'Invalid message'}}
     return {'payload': {'success': True, 'error': None}}
 
 
