@@ -66,7 +66,8 @@ class recieve_messageTest(TestCase):
         expected = {'payload': {'success': False, 'error': 'Database error'}}
         self.assertEquals(response, expected)
 
-    def test_badText_returnsUnsuccess(self):
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_badText_returnsUnsuccess(self, mocked_DBSession):
         self.body['message'] = u'hallo'
         request = testing.DummyRequest(post=self.body)
 
@@ -75,7 +76,8 @@ class recieve_messageTest(TestCase):
         expected = {'payload': {'success': False, 'error': 'Invalid message'}}
         self.assertEquals(response, expected)
 
-    def test_emptyText_returnsUnsuccess(self):
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_emptyText_returnsUnsuccess(self, mocked_DBSession):
         self.body['message'] = u''
         request = testing.DummyRequest(post=self.body)
 
@@ -84,7 +86,8 @@ class recieve_messageTest(TestCase):
         expected = {'payload': {'success': False, 'error': 'Invalid message'}}
         self.assertEquals(response, expected)
 
-    def test_halfText_returnsUnsuccess(self):
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_halfText_returnsUnsuccess(self, mocked_DBSession):
         self.body['message'] = u'1608,4108,0000,10101719,25,00820202020'
         request = testing.DummyRequest(post=self.body)
 
