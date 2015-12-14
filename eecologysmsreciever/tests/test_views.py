@@ -96,6 +96,19 @@ class recieve_messageTest(TestCase):
         expected = {'payload': {'success': False, 'error': 'Invalid message'}}
         self.assertEquals(response, expected)
 
+    def test_integrationTestFromSMSSyncApp_returnsUnsuccess(self):
+        # In the SMS Sync app > edit custom web service there is a `test integration` button
+        # this will send a request to the webservice with only the secret key, so it is missing a message
+        body = {
+            'secret': u'supersecretkey'
+        }
+        request = testing.DummyRequest(post=body)
+
+        response = recieve_message(request)
+
+        expected = {'payload': {'success': False, 'error': 'Invalid message'}}
+        self.assertEquals(response, expected)
+
 
 class StatusTest(TestCase):
 
