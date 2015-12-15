@@ -1,9 +1,9 @@
 from unittest import TestCase
-from mock import patch
+from mock import patch, DEFAULT
 from pyramid import testing
-from sqlalchemy.exc import DBAPIError
-from ..models import DBSession
-from ..views import recieve_message, status
+from sqlalchemy.exc import DBAPIError, IntegrityError
+from eecologysmsreciever.models import DBSession, Position
+from eecologysmsreciever.views import recieve_message, status
 
 
 class recieve_messageTest(TestCase):
@@ -107,6 +107,34 @@ class recieve_messageTest(TestCase):
         response = recieve_message(request)
 
         expected = {'payload': {'success': False, 'error': 'Invalid message'}}
+        self.assertEquals(response, expected)
+
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_rawmessagealreadyexists_returnsSuccess(self, mocked_DBSession):
+        mocked_DBSession.add.side_effect = IntegrityError(1, 2, 3, 4)
+        request = testing.DummyRequest(post=self.body)
+
+        response = recieve_message(request)
+
+        expected = {'payload': {'success': True, 'error': None}}
+        self.assertEquals(response, expected)
+
+
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_positionalreadyexists_returnsSuccess(self, mocked_DBSession):
+        def side_effect(arg):
+            if isinstance(arg, Position):
+                return IntegrityError(1, 2, 3, 4)
+            else:
+                return DEFAULT
+
+        mocked_DBSession.add.side_effect = side_effect
+
+        request = testing.DummyRequest(post=self.body)
+
+        response = recieve_message(request)
+
+        expected = {'payload': {'success': True, 'error': None}}
         self.assertEquals(response, expected)
 
 

@@ -15,6 +15,21 @@ def recieve_message(request):
         raw_message = RawMessage.from_request(request)
         DBSession.add(raw_message)
         DBSession.commit()
+    except IntegrityError as e:
+        # when raw message already exists then return OK, so app will treat message as being transferred
+        LOGGER.warn(e)
+        return {'payload': {'success': True, 'error': None}}
+    except DBAPIError as e:
+        DBSession.rollback()
+        LOGGER.warn(e)
+        return {'payload': {'success': False, 'error': 'Database error'}}
+    except Forbidden as e:
+        LOGGER.debug(e)
+        return {'payload': {'success': False, 'error': 'Forbidden'}}
+    except KeyError as e:
+        LOGGER.debug(e)
+        return {'payload': {'success': False, 'error': 'Invalid message'}}
+    try:
         message = Message.from_raw(raw_message)
         DBSession.add(message)
         DBSession.commit()
@@ -27,20 +42,10 @@ def recieve_message(request):
                 LOGGER.warn('Position already stored, skipping it')
                 LOGGER.warn(e)
         DBSession.commit()
-    except DBAPIError as e:
-        DBSession.rollback()
-        LOGGER.warn(e)
-        return {'payload': {'success': False, 'error': 'Database error'}}
-    except Forbidden as e:
-        LOGGER.debug(e)
-        return {'payload': {'success': False, 'error': 'Forbidden'}}
     except IndexError as e:
         LOGGER.debug(e)
         return {'payload': {'success': False, 'error': 'Invalid message'}}
     except ValueError as e:
-        LOGGER.debug(e)
-        return {'payload': {'success': False, 'error': 'Invalid message'}}
-    except KeyError as e:
         LOGGER.debug(e)
         return {'payload': {'success': False, 'error': 'Invalid message'}}
     return {'payload': {'success': True, 'error': None}}
