@@ -1,3 +1,8 @@
+1.0.6
+-----
+
+- When raw message already exists return OK, instead of error
+
 1.0.5
 -----
 

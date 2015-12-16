@@ -17,6 +17,7 @@ def recieve_message(request):
         DBSession.commit()
     except IntegrityError as e:
         # when raw message already exists then return OK, so app will treat message as being transferred
+        DBSession.rollback()
         LOGGER.warn(e)
         return {'payload': {'success': True, 'error': None}}
     except DBAPIError as e:
