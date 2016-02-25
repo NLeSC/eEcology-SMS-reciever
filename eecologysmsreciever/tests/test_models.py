@@ -209,6 +209,30 @@ class MessageTest(TestCase):
         self.assertEqual(message.positions[3].lat, 52.4983503)
         self.assertEqual(message.positions[3].location, 'SRID=4326;POINT(4.9842014 52.4983503)')
 
+    def test_fromBody_hour(self):
+        """Regression test for wrong hour"""
+        body = u'1610,4157,0000,012026,013,00820202020204020200,3,718,16055,43475,56715968,519871672,16055,69404,56719362,519869180,16055,61973,56716411,519868866'
+
+        message = Message.from_body(body)
+
+        self.assertEqual(message.device_info_serial, 1610)
+        self.assertEqual(message.battery_voltage, 4.157)
+        self.assertEqual(message.memory_usage, 0.0)
+        self.assertEqual(message.debug_info, u'012026,013,00820202020204020200,3,718')
+        self.assertEqual(len(message.positions), 3)
+        self.assertEqual(message.positions[0].date_time, datetime(2016, 2, 24, 12, 4, 35, tzinfo=utc))
+        self.assertEqual(message.positions[0].lon, 5.6715968)
+        self.assertEqual(message.positions[0].lat, 51.9871672)
+        self.assertEqual(message.positions[0].location, 'SRID=4326;POINT(5.6715968 51.9871672)')
+        self.assertEqual(message.positions[1].date_time, datetime(2016, 2, 24, 19, 16, 44, tzinfo=utc))
+        self.assertEqual(message.positions[1].lon, 5.6719362)
+        self.assertEqual(message.positions[1].lat, 51.9869180)
+        self.assertEqual(message.positions[1].location, 'SRID=4326;POINT(5.6719362 51.986918)')
+        self.assertEqual(message.positions[2].date_time, datetime(2016, 2, 24, 17, 12, 53, tzinfo=utc))
+        self.assertEqual(message.positions[2].lon, 5.6716411)
+        self.assertEqual(message.positions[2].lat, 51.9868866)
+        self.assertEqual(message.positions[2].location, 'SRID=4326;POINT(5.6716411 51.9868866)')
+
     def test_fromBody_noId(self):
         body = u'Meet you at the bar tonight'
         with self.assertRaises(ValueError):

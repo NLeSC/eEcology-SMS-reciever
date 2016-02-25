@@ -1,3 +1,8 @@
+1.0.7
+-----
+
+- Force UTC timezone during insert
+
 1.0.6
 -----
 

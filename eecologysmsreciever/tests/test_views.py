@@ -28,6 +28,14 @@ class recieve_messageTest(TestCase):
         testing.tearDown()
 
     @patch('eecologysmsreciever.views.DBSession')
+    def test_sets_timezone2utc(self, mocked_DBSession):
+        request = testing.DummyRequest(post=self.body)
+
+        recieve_message(request)
+
+        mocked_DBSession.execute.assert_called_once_with("SET TIME ZONE 'UTC'")
+
+    @patch('eecologysmsreciever.views.DBSession')
     def test_returnsSuccess(self, mocked_DBSession):
         request = testing.DummyRequest(post=self.body)
 
@@ -47,7 +55,8 @@ class recieve_messageTest(TestCase):
         assert mocked_DBSession.begin_nested.times_called(3)
         # TODO assert what add() was called with
 
-    def test_badSecret_returnsUnsuccess(self):
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_badSecret_returnsUnsuccess(self, mocked_DBSession):
         self.body['secret'] = 'the wrong secret'
         request = testing.DummyRequest(post=self.body)
 
@@ -96,7 +105,8 @@ class recieve_messageTest(TestCase):
         expected = {'payload': {'success': False, 'error': 'Invalid message'}}
         self.assertEquals(response, expected)
 
-    def test_integrationTestFromSMSSyncApp_returnsUnsuccess(self):
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_integrationTestFromSMSSyncApp_returnsUnsuccess(self, mocked_DBSession):
         # In the SMS Sync app > edit custom web service there is a `test integration` button
         # this will send a request to the webservice with only the secret key, so it is missing a message
         body = {

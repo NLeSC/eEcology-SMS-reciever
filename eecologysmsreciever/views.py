@@ -11,6 +11,9 @@ LOGGER = logging.getLogger('eecologysmsreciever')
 
 @view_config(route_name='messages', request_method='POST', renderer='json')
 def recieve_message(request):
+    # Make sure db is set to UTC,
+    # db.e-ecology.sara.nl has 'Europe/Amsterdam' as timezone causing date_time to be stored in that timezone
+    DBSession.execute("SET TIME ZONE 'UTC'")
     try:
         raw_message = RawMessage.from_request(request)
         DBSession.add(raw_message)
