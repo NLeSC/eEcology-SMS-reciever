@@ -1,7 +1,7 @@
 import logging
 from pyramid.view import view_config
 from pyramid.exceptions import Forbidden
-from sqlalchemy.exc import DBAPIError, IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError, ProgrammingError
 from .version import __version__
 
 from .models import DBSession, RawMessage, Message
@@ -37,7 +37,18 @@ def recieve_message(request):
         message = Message.from_raw(raw_message)
         DBSession.add(message)
         DBSession.commit()
-        positions = message.positions
+
+        positions = []
+        try:
+            positions = message.positions
+        except ProgrammingError as e:
+            # when no positions where in message
+            # then SQLalchemy tries to perform a SELECT
+            # which the service is not allowed to do
+            # so ignore any errors
+            DBSession.rollback()
+            LOGGER.warn(e)
+
         for position in positions:
             try:
                 with DBSession.begin_nested():
@@ -46,6 +57,7 @@ def recieve_message(request):
                 LOGGER.warn('Position already stored, skipping it')
                 LOGGER.warn(e)
         DBSession.commit()
+
     except IndexError as e:
         LOGGER.debug(e)
         return {'payload': {'success': False, 'error': 'Invalid message'}}

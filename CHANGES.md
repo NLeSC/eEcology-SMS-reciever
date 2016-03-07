@@ -1,3 +1,10 @@
+1.0.8
+-----
+
+### Fixed
+
+- Message with no positions, caused a permission denied which caused transaction is aborted error
+
 1.0.7
 -----
 
