@@ -1,3 +1,12 @@
+1.0.9
+-----
+
+### Added
+
+- Example apache config
+- Example nagios check
+- Functional tests
+
 1.0.8
 -----
 
