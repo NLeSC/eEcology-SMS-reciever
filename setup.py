@@ -21,6 +21,7 @@ requires = [
     'mock',
     'coverage',
     'pytz',
+    'WebTest',
     # for db migrations
     'alembic',
     ]

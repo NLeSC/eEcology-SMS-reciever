@@ -5,6 +5,7 @@ install:
   - 'python setup.py develop'
 script:
   - 'nosetests --with-xunit --cover-xml'
+  - DB_URL=postgresql://postgres@localhost/postgres nosetests -a functional
 after_script:
   - 'pip install scrutinizer-ocular'
   - ocular

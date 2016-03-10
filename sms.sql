@@ -2,9 +2,11 @@
 -- from eecologysmsreciever.models import dump_ddl
 -- print dump_ddl()
 
-CREATE SCHEMA sms;
+CREATE EXTENSION IF NOT EXISTS postgis;
 
-CREATE TABLE sms.raw_message (
+CREATE SCHEMA IF NOT EXISTS sms;
+
+CREATE TABLE IF NOT EXISTS sms.raw_message (
 	id SERIAL NOT NULL,
 	message_id UUID,
 	sent_from VARCHAR,
@@ -17,7 +19,7 @@ CREATE TABLE sms.raw_message (
 );
 
 
-CREATE TABLE sms.message (
+CREATE TABLE IF NOT EXISTS sms.message (
 	id INTEGER NOT NULL,
 	device_info_serial INTEGER,
 	date_time TIMESTAMP WITHOUT TIME ZONE,
@@ -29,7 +31,7 @@ CREATE TABLE sms.message (
 );
 
 
-CREATE TABLE sms.position (
+CREATE TABLE IF NOT EXISTS sms.position (
 	id INTEGER NOT NULL,
 	device_info_serial INTEGER,
 	date_time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -41,7 +43,7 @@ CREATE TABLE sms.position (
 	FOREIGN KEY(id) REFERENCES sms.message (id)
 );
 
-CREATE INDEX "idx_position_location" ON "sms"."position" USING GIST (location);
+CREATE INDEX idx_position_location ON sms.position USING GIST (location);
 
 -- create user to insert sms messages
 --

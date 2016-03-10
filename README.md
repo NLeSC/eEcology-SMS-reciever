@@ -76,3 +76,27 @@ To upgrade an existing schema run:
 
     alembic upgrade head --sql | psql ...
 
+
+Tests
+-----
+
+### Unit tests
+
+The unit tests can be run with
+```
+nosetests
+```
+
+### Functional tests
+
+The functional tests needs
+
+* Postgresql database with PostGIS extension
+* Postgresql user with schema and user creation permission
+
+The tests can be run with
+
+```
+DB_URL=postgresql://postgres:mysecretpassword@172.17.0.2/postgres nosetests -a functional
+```
+
