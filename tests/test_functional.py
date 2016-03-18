@@ -2,6 +2,7 @@ import datetime
 import os
 from nose.plugins.attrib import attr
 from nose.tools import eq_
+from nose.tools import assert_raises
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from webtest import TestApp
@@ -10,7 +11,7 @@ from eecologysmsreciever import main
 
 
 @attr('functional')
-class Functional_tests(object):
+class TestFunctional(object):
     db_root_url = ''
 
     @classmethod
@@ -29,6 +30,7 @@ class Functional_tests(object):
         GRANT USAGE ON SCHEMA sms TO smswriter;
         GRANT INSERT ON sms.raw_message TO smswriter;
         GRANT SELECT (id) ON sms.raw_message TO smswriter;
+        GRANT SELECT (date_time) ON sms.position TO smswriter;
         GRANT INSERT ON sms.message TO smswriter;
         GRANT INSERT ON sms.position TO smswriter;
         GRANT USAGE on SEQUENCE sms.raw_message_id_seq TO smswriter;
@@ -54,8 +56,9 @@ class Functional_tests(object):
 
         self.settings = {
             'sqlalchemy.url': str(db_user_url),
+            'sqlalchemy.echo': True,
             'secret_key': 'supersecretkey',
-            'alert_too_old': 26,
+            'alert_too_old': '26',
         }
         app = main({}, **self.settings)
         self.testapp = TestApp(app)
@@ -120,4 +123,26 @@ class Functional_tests(object):
         expected_positions = [(1, 1607, datetime.datetime(2015, 5, 13, 14, 39, 57), 52.3572094, 4.9561568, u'POINT(4.9561568 52.3572094)'), (1, 1607, datetime.datetime(2015, 5, 13, 14, 48, 55), 52.3804057, 4.9694351, u'POINT(4.9694351 52.3804057)'), (1, 1607, datetime.datetime(2015, 5, 13, 14, 46, 1), 52.3701953, 4.9624783, u'POINT(4.9624783 52.3701953)')]
         self.expected_sms(expected_raw_messages, expected_messages, expected_positions)
 
+    def test_status_empty_toooldalert(self):
+        with assert_raises(ValueError) as ex:
+            self.testapp.get('/status')
 
+        eq_(ex.exception.message, 'Positions have not been received recently')
+
+    def test_status_filled(self):
+        valid_pos_year = unicode(datetime.datetime.utcnow().year)[2:]
+        params = {
+            'from': u'1234567890',
+            'message': u'1607,4099,0000,014022,031,00820202020204020200,0,722,' +
+                       valid_pos_year + u'364,52797,49561568,523572094',
+            'message_id': u'7ba817ec-0c78-41cd-be10-7907ff787d39',
+            'sent_to': u'0987654321',
+            'secret': u'supersecretkey',
+            'device_id': u'a gateway id',
+            'sent_timestamp': u'1424873155000'
+        }
+        self.testapp.post('/messages', params)
+
+        response = self.testapp.get('/status')
+
+        eq_(response.status_int, 200)

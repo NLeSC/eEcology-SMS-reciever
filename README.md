@@ -104,3 +104,4 @@ Postgis in a docker container can be used to test.
 ```
 docker run --name some-postgis -e POSTGRES_PASSWORD=mysecretpassword -d mdillon/postgis
 ```
+

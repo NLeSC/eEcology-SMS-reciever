@@ -165,12 +165,7 @@ class StatusTest(TestCase):
         response = status(request)
 
         self.assertTrue('version' in response)
-        expected_dt = datetime(2014, 9, 18, 8, 43, tzinfo=utc)
-        expected = [
-                    call("SET TIME ZONE 'UTC'"),
-                    call('SELECT TRUE FROM sms.position WHERE date_time >= ? LIMIT 1', expected_dt),
-                    ]
-        eq_(mocked_DBSession.execute.call_args_list, expected)
+        mocked_DBSession.execute.assert_called_once_with("SET TIME ZONE 'UTC'")
 
     @patch('eecologysmsreciever.views.DBSession')
     def test_baddbconnection(self, mocked_DBSession):
