@@ -15,6 +15,8 @@ pyramid.includes =
 
 sqlalchemy.url = postgresql://*******:********@db.e-ecology.sara.nl/eecology?sslmode=require
 secret_key = supersecretkey
+# If last sms position has timestamp is olderd than `alert_too_old` hours ago then /sms/status will complain.
+alert_too_old = 26
 
 [composite:main]
 use = egg:Paste#urlmap

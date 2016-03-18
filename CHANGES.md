@@ -1,3 +1,10 @@
+1.0.10
+------
+
+### Added
+
+- /status endpoint will give error when no positions have been received recently
+
 1.0.9
 -----
 

@@ -51,6 +51,7 @@ CREATE INDEX idx_position_location ON sms.position USING GIST (location);
 -- GRANT USAGE ON SCHEMA sms TO smswriter;
 -- GRANT INSERT ON sms.raw_message TO smswriter;
 -- GRANT SELECT (id) ON sms.raw_message TO smswriter;
+-- GRANT SELECT (date_time) ON sms.position TO smswriter;
 -- GRANT INSERT ON sms.message TO smswriter;
 -- GRANT INSERT ON sms.position TO smswriter;
 -- GRANT USAGE on SEQUENCE sms.raw_message_id_seq TO smswriter;
