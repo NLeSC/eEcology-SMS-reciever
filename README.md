@@ -100,3 +100,7 @@ The tests can be run with
 DB_URL=postgresql://postgres:mysecretpassword@172.17.0.2/postgres nosetests -a functional
 ```
 
+Postgis in a docker container can be used to test.
+```
+docker run --name some-postgis -e POSTGRES_PASSWORD=mysecretpassword -d mdillon/postgis
+```

@@ -1,7 +1,12 @@
+from datetime import datetime
 from unittest import TestCase
-from mock import patch, DEFAULT
+from mock import patch, DEFAULT, call
+from pytz import utc
+
 from pyramid import testing
+from nose.tools import eq_
 from sqlalchemy.exc import DBAPIError, IntegrityError
+from sqlalchemy.orm.exc import NoResultFound
 from eecologysmsreciever.models import DBSession, Position
 from eecologysmsreciever.views import recieve_message, status
 
@@ -150,13 +155,22 @@ class recieve_messageTest(TestCase):
 
 class StatusTest(TestCase):
 
+    @patch('eecologysmsreciever.views.utcnow')
     @patch('eecologysmsreciever.views.DBSession')
-    def test_it(self, mocked_DBSession):
+    def test_it(self, mocked_DBSession, mocked_utcnow):
+        mocked_utcnow.return_value = datetime(2014, 9, 18, 12, 43, tzinfo=utc)
+        request = testing.DummyRequest()
+        request.registry.settings = {'alert_too_old': 4}
 
-        response = status(testing.DummyRequest())
+        response = status(request)
 
         self.assertTrue('version' in response)
-        mocked_DBSession.execute.assert_called_once_with('SELECT TRUE')
+        expected_dt = datetime(2014, 9, 18, 8, 43, tzinfo=utc)
+        expected = [
+                    call("SET TIME ZONE 'UTC'"),
+                    call('SELECT TRUE FROM sms.position WHERE date_time >= ? LIMIT 1', expected_dt),
+                    ]
+        eq_(mocked_DBSession.execute.call_args_list, expected)
 
     @patch('eecologysmsreciever.views.DBSession')
     def test_baddbconnection(self, mocked_DBSession):
@@ -164,3 +178,15 @@ class StatusTest(TestCase):
 
         with self.assertRaises(DBAPIError):
             status(testing.DummyRequest())
+
+    @patch('eecologysmsreciever.views.utcnow')
+    @patch('eecologysmsreciever.views.DBSession')
+    def test_positiontooold(self, mocked_DBSession, mocked_utcnow):
+        mocked_DBSession.execute.side_effect = NoResultFound()
+        mocked_utcnow.return_value = datetime(2015, 9, 18, 12, 43, tzinfo=utc)
+        request = testing.DummyRequest()
+        request.registry.settings = {'alert_too_old': 4}
+
+        with self.assertRaises(NoResultFound):
+            status(request)
+

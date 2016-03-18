@@ -1,4 +1,7 @@
 import logging
+from datetime import datetime
+from datetime import timedelta
+
 from pyramid.view import view_config
 from pyramid.exceptions import Forbidden
 from sqlalchemy.exc import DBAPIError, IntegrityError, ProgrammingError
@@ -67,7 +70,18 @@ def recieve_message(request):
     return {'payload': {'success': True, 'error': None}}
 
 
+def utcnow():
+    """Now
+
+    :return: (datetime.datetime)
+    """
+    return datetime.utcnow()
+
+
 @view_config(route_name='status', request_method='GET', renderer='json')
 def status(request):
-    DBSession.execute('SELECT TRUE').scalar()
+    DBSession.execute("SET TIME ZONE 'UTC'")
+    alert_too_old = request.registry.settings['alert_too_old']
+    latest_dt = utcnow() - timedelta(hours=alert_too_old)
+    DBSession.execute('SELECT TRUE FROM sms.position WHERE date_time >= ? LIMIT 1', latest_dt).scalar()
     return {'version': __version__}

@@ -10,7 +10,7 @@ from eecologysmsreciever import main
 
 
 @attr('functional')
-class functional_tests(object):
+class Functional_tests(object):
     db_root_url = ''
 
     @classmethod
@@ -54,7 +54,8 @@ class functional_tests(object):
 
         self.settings = {
             'sqlalchemy.url': str(db_user_url),
-            'secret_key': 'supersecretkey'
+            'secret_key': 'supersecretkey',
+            'alert_too_old': 26,
         }
         app = main({}, **self.settings)
         self.testapp = TestApp(app)
