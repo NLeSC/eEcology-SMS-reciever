@@ -1,10 +1,14 @@
 import logging
+from datetime import datetime
+from datetime import timedelta
+
 from pyramid.view import view_config
 from pyramid.exceptions import Forbidden
+from pyramid.httpexceptions import HTTPServerError
 from sqlalchemy.exc import DBAPIError, IntegrityError, ProgrammingError
 from .version import __version__
 
-from .models import DBSession, RawMessage, Message
+from .models import DBSession, RawMessage, Message, Position
 
 LOGGER = logging.getLogger('eecologysmsreciever')
 
@@ -67,12 +71,26 @@ def recieve_message(request):
     return {'payload': {'success': True, 'error': None}}
 
 
+def utcnow():
+    """Now
+
+    :return: (datetime.datetime)
+    """
+    return datetime.utcnow()
+
+
 @view_config(route_name='status', request_method='GET', renderer='json')
 def status(request):
     try:
-        DBSession.execute('SELECT TRUE').scalar()
+        DBSession.execute("SET TIME ZONE 'UTC'")
+        alert_too_old = request.registry.settings['alert_too_old']
+        latest_dt = utcnow() - timedelta(hours=alert_too_old)
+        last_position = DBSession.query(Position.date_time).filter(Position.date_time >= latest_dt).limit(1).scalar()
+        DBSession.commit()
+        if last_position is None:
+            raise ValueError('Positions have not been received recently')
+        return {'version': __version__}
     except DBAPIError as e:
         DBSession.rollback()
         LOGGER.warn(e)
         raise e
-    return {'version': __version__}
