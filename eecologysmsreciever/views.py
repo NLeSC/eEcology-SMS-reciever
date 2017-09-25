@@ -13,8 +13,8 @@ LOGGER = logging.getLogger('eecologysmsreciever')
 def recieve_message(request):
     # Make sure db is set to UTC,
     # db.e-ecology.sara.nl has 'Europe/Amsterdam' as timezone causing date_time to be stored in that timezone
-    DBSession.execute("SET TIME ZONE 'UTC'")
     try:
+        DBSession.execute("SET TIME ZONE 'UTC'")
         raw_message = RawMessage.from_request(request)
         DBSession.add(raw_message)
         DBSession.commit()
@@ -69,5 +69,10 @@ def recieve_message(request):
 
 @view_config(route_name='status', request_method='GET', renderer='json')
 def status(request):
-    DBSession.execute('SELECT TRUE').scalar()
+    try:
+        DBSession.execute('SELECT TRUE').scalar()
+    except DBAPIError as e:
+        DBSession.rollback()
+        LOGGER.warn(e)
+        raise e
     return {'version': __version__}
