@@ -4,6 +4,7 @@ eEcology-SMS-reciever
 [![Build Status](https://travis-ci.org/NLeSC/eEcology-SMS-reciever.svg?branch=master)](https://travis-ci.org/NLeSC/eEcology-SMS-reciever)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/NLeSC/eEcology-SMS-reciever/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/eEcology-SMS-reciever/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/NLeSC/eEcology-SMS-reciever/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/NLeSC/eEcology-SMS-reciever/?branch=master)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.47325.svg)](https://doi.org/10.5281/zenodo.47325)
 
 Webservice to store SMS messages into a database table.
 

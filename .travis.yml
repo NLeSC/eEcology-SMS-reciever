@@ -1,6 +1,10 @@
 language: python
 python:
   - "2.7"
+services:
+  - postgresql
+before_script:
+  - psql -U postgres -c "create extension postgis"
 install:
   - 'python setup.py develop'
 script:
@@ -11,4 +15,3 @@ after_script:
   - ocular
 sudo: false
 cache: pip
-
