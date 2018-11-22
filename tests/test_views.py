@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest import TestCase
 from mock import patch, DEFAULT, call
+from pyramid.httpexceptions import HTTPServerError
 from pytz import utc
 
 from pyramid import testing
@@ -182,6 +183,6 @@ class StatusTest(TestCase):
         request = testing.DummyRequest()
         request.registry.settings = {'alert_too_old': 4}
 
-        with self.assertRaises(NoResultFound):
+        with self.assertRaises(HTTPServerError):
             status(request)
 

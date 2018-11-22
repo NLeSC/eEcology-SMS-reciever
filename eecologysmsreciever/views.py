@@ -6,6 +6,8 @@ from pyramid.view import view_config
 from pyramid.exceptions import Forbidden
 from pyramid.httpexceptions import HTTPServerError
 from sqlalchemy.exc import DBAPIError, IntegrityError, ProgrammingError, SQLAlchemyError
+from sqlalchemy.orm.exc import NoResultFound
+
 from .version import __version__
 
 from .models import DBSession, RawMessage, Message, Position
@@ -110,9 +112,11 @@ def status(request):
         last_position = DBSession.query(Position.date_time).filter(Position.date_time >= latest_dt).limit(1).scalar()
         DBSession.commit()
         if last_position is None:
-            raise ValueError('Positions have not been received recently')
+            raise HTTPServerError('Positions have not been received recently')
         return {'version': __version__}
     except DBAPIError as e:
         DBSession.rollback()
         LOGGER.warn(e)
         raise e
+    except NoResultFound:
+        raise HTTPServerError('Positions have not been received recently')
