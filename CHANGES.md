@@ -1,6 +1,10 @@
 1.0.10
 ------
 
+### Fixed
+
+- Catch InvalidRequestError and perform rollback
+
 ### Added
 
 - /status endpoint will give error when no positions have been received recently
