@@ -5,7 +5,7 @@ from datetime import timedelta
 from pyramid.view import view_config
 from pyramid.exceptions import Forbidden
 from pyramid.httpexceptions import HTTPServerError
-from sqlalchemy.exc import DBAPIError, IntegrityError, ProgrammingError
+from sqlalchemy.exc import DBAPIError, IntegrityError, ProgrammingError, SQLAlchemyError
 from .version import __version__
 
 from .models import DBSession, RawMessage, Message, Position
@@ -31,6 +31,13 @@ def recieve_message(request):
         DBSession.rollback()
         LOGGER.warn(e)
         return {'payload': {'success': False, 'error': 'Database error'}}
+    except SQLAlchemyError as e:
+        # Catches:
+        # StatementError: Can't reconnect until invalid transaction is rolled back
+        # (original cause: InvalidRequestError: Can't reconnect until invalid transaction is rolled back)
+        DBSession.rollback()
+        LOGGER.warn(e)
+        return {'payload': {'success': False, 'error': 'Database ORM error'}}
     except Forbidden as e:
         LOGGER.debug(e)
         return {'payload': {'success': False, 'error': 'Forbidden'}}
@@ -56,7 +63,7 @@ def recieve_message(request):
         for position in positions:
             try:
                 with DBSession.begin_nested():
-                    DBSession.add(position)
+                    DBSession.merge(position)
             except IntegrityError as e:
                 LOGGER.warn('Position already stored, skipping it')
                 LOGGER.warn(e)
@@ -68,6 +75,21 @@ def recieve_message(request):
     except ValueError as e:
         LOGGER.debug(e)
         return {'payload': {'success': False, 'error': 'Invalid message'}}
+    except IntegrityError as e:
+        DBSession.rollback()
+        LOGGER.warn(e)
+        return {'payload': {'success': False, 'error': 'Database error'}}
+    except DBAPIError as e:
+        DBSession.rollback()
+        LOGGER.warn(e)
+        return {'payload': {'success': False, 'error': 'Database error'}}
+    except SQLAlchemyError as e:
+        # Catches:
+        # StatementError: Can't reconnect until invalid transaction is rolled back
+        # (original cause: InvalidRequestError: Can't reconnect until invalid transaction is rolled back)
+        DBSession.rollback()
+        LOGGER.warn(e)
+        return {'payload': {'success': False, 'error': 'Database ORM error'}}
     return {'payload': {'success': True, 'error': None}}
 
 
