@@ -13,15 +13,10 @@ requires = [
     'pyramid_debugtoolbar',
     'SQLAlchemy==0.9.8',
     'GeoAlchemy2',
-    'psycopg2',
+    'psycopg2-binary',
     'waitress',
     'paste',
-    # for testing
-    'nose',
-    'mock',
-    'coverage',
     'pytz',
-    'WebTest',
     # for db migrations
     'alembic',
     ]

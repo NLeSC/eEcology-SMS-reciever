@@ -1,2 +1,7 @@
+# for testing
+nose
+mock
+coverage
+WebTest
 # requirements are listed in setup.py
 -e .

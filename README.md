@@ -14,9 +14,9 @@ Getting Started
 ---------------
 
     cd <directory containing this file>
-    virtualenv env
-    . env/bin/activate
-    python setup.py develop
+    pipenv --two
+    pipenv shell
+    pip install -r requirements.txt
     cp development.ini-dist development.ini
 
 Edit development.ini to configure db connection, etc.
